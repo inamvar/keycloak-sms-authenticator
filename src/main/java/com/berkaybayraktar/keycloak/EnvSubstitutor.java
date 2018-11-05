@@ -1,4 +1,4 @@
-package six.six.keycloak;
+package com.berkaybayraktar.keycloak;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.text.StrLookup;
@@ -21,7 +21,7 @@ public class EnvSubstitutor {
         @Override
         public String lookup(String key) {
             String value;
-            if(key.indexOf(VAULT_PREFIX) > -1){
+            if(key.contains(VAULT_PREFIX)){
                 try {
                     value = SecurityVaultUtil.getValueAsString(key);
                 } catch (SecurityVaultException e) {

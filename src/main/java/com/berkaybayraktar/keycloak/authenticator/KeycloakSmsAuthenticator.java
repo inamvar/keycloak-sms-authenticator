@@ -1,4 +1,4 @@
-package six.six.keycloak.authenticator;
+package com.berkaybayraktar.keycloak.authenticator;
 
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -11,8 +11,8 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserCredentialModel;
 import org.keycloak.models.UserModel;
-import six.six.keycloak.KeycloakSmsConstants;
-import six.six.keycloak.requiredaction.action.required.KeycloakSmsMobilenumberRequiredAction;
+import com.berkaybayraktar.keycloak.KeycloakSmsConstants;
+import com.berkaybayraktar.keycloak.requiredaction.action.required.KeycloakSmsMobilenumberRequiredAction;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -71,7 +71,7 @@ public class KeycloakSmsAuthenticator implements Authenticator {
         String mobileNumber =getMobileNumber(user);
         String mobileNumberVerified = getMobileNumberVerified(user);
 
-        if (onlyForVerification==false || isOnlyForVerificationMode(onlyForVerification, mobileNumber,mobileNumberVerified)){
+        if (!onlyForVerification || isOnlyForVerificationMode(onlyForVerification, mobileNumber,mobileNumberVerified)){
             if (mobileNumber != null) {
                 // The mobile number is configured --> send an SMS
                 long nrOfDigits = KeycloakSmsAuthenticatorUtil.getConfigLong(config, KeycloakSmsConstants.CONF_PRP_SMS_CODE_LENGTH, 8L);

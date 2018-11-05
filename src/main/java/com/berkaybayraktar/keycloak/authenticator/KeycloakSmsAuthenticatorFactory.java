@@ -1,5 +1,7 @@
-package six.six.keycloak.authenticator;
+package com.berkaybayraktar.keycloak.authenticator;
 
+import com.berkaybayraktar.gateway.Gateways;
+import com.berkaybayraktar.keycloak.KeycloakSmsConstants;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.authentication.Authenticator;
@@ -9,10 +11,9 @@ import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderConfigProperty;
-import six.six.gateway.Gateways;
-import six.six.keycloak.KeycloakSmsConstants;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,7 +36,7 @@ public class KeycloakSmsAuthenticatorFactory implements AuthenticatorFactory, Co
             AuthenticationExecutionModel.Requirement.OPTIONAL,
             AuthenticationExecutionModel.Requirement.DISABLED};
 
-    private static final List<ProviderConfigProperty> configProperties = new ArrayList<ProviderConfigProperty>();
+    private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
 
     static {
         ProviderConfigProperty property;
@@ -46,7 +47,7 @@ public class KeycloakSmsAuthenticatorFactory implements AuthenticatorFactory, Co
         property.setLabel("SMS code time to live");
         property.setType(ProviderConfigProperty.STRING_TYPE);
         property.setHelpText("The validity of the sent code in seconds.");
-        property.setDefaultValue(60*5);
+        property.setDefaultValue(60 * 5);
         configProperties.add(property);
 
         property = new ProviderConfigProperty();
@@ -63,41 +64,25 @@ public class KeycloakSmsAuthenticatorFactory implements AuthenticatorFactory, Co
         property.setLabel("SMS gateway");
         property.setHelpText("Select SMS gateway");
         property.setType(ProviderConfigProperty.LIST_TYPE);
-        property.setDefaultValue(Gateways.AMAZON_SNS);
+        property.setDefaultValue(Gateways.SMS_LOGGER);
         property.setOptions(Stream.of(Gateways.values())
                 .map(Enum::name)
                 .collect(Collectors.toList()));
         configProperties.add(property);
 
-        // SMS Endpoint
-        property = new ProviderConfigProperty();
-        property.setName(KeycloakSmsConstants.CONF_PRP_SMS_GATEWAY_ENDPOINT);
-        property.setLabel("SMS endpoint");
-        property.setType(ProviderConfigProperty.STRING_TYPE);
-        property.setHelpText("Not useful for AWS SNS.");
-        configProperties.add(property);
-
         // Credential
         property = new ProviderConfigProperty();
         property.setName(KeycloakSmsConstants.CONF_PRP_SMS_CLIENTTOKEN);
-        property.setLabel("Client id");
+        property.setLabel("Client Token");
         property.setType(ProviderConfigProperty.STRING_TYPE);
-        property.setHelpText("AWS Client Token or LyraSMS User");
+        property.setHelpText("Client Username");
         configProperties.add(property);
 
         property = new ProviderConfigProperty();
         property.setName(KeycloakSmsConstants.CONF_PRP_SMS_CLIENTSECRET);
-        property.setLabel("Client secret");
-        property.setHelpText("AWS Client Secret or LyraSMS Password");
+        property.setLabel("Client Secret");
+        property.setHelpText("Client Password");
         property.setType(ProviderConfigProperty.STRING_TYPE);
-        configProperties.add(property);
-
-        // Proxy
-        property = new ProviderConfigProperty();
-        property.setName(KeycloakSmsConstants.PROXY_ENABLED);
-        property.setType(ProviderConfigProperty.BOOLEAN_TYPE);
-        property.setLabel("Use Proxy");
-        property.setHelpText("Add Java Properties: http(s).proxyHost,http(s).proxyPort");
         configProperties.add(property);
 
         //First time verification
@@ -113,9 +98,8 @@ public class KeycloakSmsAuthenticatorFactory implements AuthenticatorFactory, Co
         property.setName(KeycloakSmsConstants.MOBILE_ASKFOR_ENABLED);
         property.setType(ProviderConfigProperty.BOOLEAN_TYPE);
         property.setLabel("Ask for mobile number");
-        property.setHelpText("Enable access and ask for mobilenumber if it isn't defined");
+        property.setHelpText("Enable access and ask for mobile number if it isn't defined");
         configProperties.add(property);
-
 
     }
 
@@ -131,7 +115,7 @@ public class KeycloakSmsAuthenticatorFactory implements AuthenticatorFactory, Co
 
 
     public AuthenticationExecutionModel.Requirement[] getRequirementChoices() {
-        logger.debug("getRequirementChoices called ... returning " + REQUIREMENT_CHOICES);
+        logger.debug("getRequirementChoices called ... returning " + Arrays.toString(REQUIREMENT_CHOICES));
         return REQUIREMENT_CHOICES;
     }
 

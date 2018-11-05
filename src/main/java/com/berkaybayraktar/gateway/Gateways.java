@@ -1,9 +1,8 @@
-package six.six.gateway;
+package com.berkaybayraktar.gateway;
 
 /**
  * Supported Gateways List
  */
 public enum Gateways {
-    AMAZON_SNS,
-    LYRA_SMS
+    SMS_LOGGER
 }

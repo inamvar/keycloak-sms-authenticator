@@ -1,4 +1,4 @@
-package six.six.keycloak.authenticator.credential;
+package com.berkaybayraktar.keycloak.authenticator.credential;
 
 import org.keycloak.credential.CredentialProvider;
 import org.keycloak.credential.CredentialProviderFactory;

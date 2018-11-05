@@ -8,8 +8,6 @@ To install the SMS Authenticator one has to:
 * Add three templates to the Keycloak server:
   * `$ cp templates/sms-validation.ftl _KEYCLOAK_HOME_/themes/base/login/`
   * `$ cp templates/sms-validation-error.ftl _KEYCLOAK_HOME_/themes/base/login/`
-  * `$ cp templates/sms-validation-mobile-number.ftl _KEYCLOAK_HOME_/themes/base/login/`
-
 
 Configure your REALM to use the SMS Authentication.
 First create a new REALM (or select a previously created REALM).
@@ -28,13 +26,3 @@ Under Authentication > Required Actions:
 * Make sure that for the 'SMS Authentication' both the 'Enabled' and 'Default Action' check boxes are checked.
 * Click on Register and select 'Mobile Number' to add the Required Action to the REALM.
 * Make sure that for the 'Mobile Number' both the 'Enabled' and 'Default Action' check boxes are checked.
-
-Malys contributions (for [Lyra Network](https://www.lyra-network.com/))
-* Internationalization support
-* Vault, Java properties, environment variables parameters support
-* Lyrasms gateway support
-* Add mobilephone number verification
-* Add input mobile phone number on authenticator
-* Refactoring
-* Template cleaning
-* Documentation

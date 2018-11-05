@@ -1,6 +1,11 @@
-package six.six.keycloak.authenticator;
+package com.berkaybayraktar.keycloak.authenticator;
 
 
+import com.berkaybayraktar.gateway.Gateways;
+import com.berkaybayraktar.gateway.SMSService;
+import com.berkaybayraktar.gateway.smslogger.SMSLogger;
+import com.berkaybayraktar.keycloak.EnvSubstitutor;
+import com.berkaybayraktar.keycloak.KeycloakSmsConstants;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
@@ -11,12 +16,6 @@ import org.keycloak.models.AuthenticatorConfigModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.theme.Theme;
 import org.keycloak.theme.ThemeProvider;
-import six.six.gateway.Gateways;
-import six.six.gateway.SMSService;
-import six.six.gateway.aws.snsclient.SnsNotificationService;
-import six.six.gateway.lyrasms.LyraSMSService;
-import six.six.keycloak.EnvSubstitutor;
-import six.six.keycloak.KeycloakSmsConstants;
 
 import java.io.IOException;
 import java.util.List;
@@ -66,9 +65,9 @@ public class KeycloakSmsAuthenticatorUtil {
 
         if (config.getConfig() != null) {
             // Get value
-            Object obj = config.getConfig().get(configName);
+            String obj = config.getConfig().get(configName);
             try {
-                value = Long.valueOf((String) obj); // s --> ms
+                value = Long.valueOf(obj); // s --> ms
             } catch (NumberFormatException nfe) {
                 logger.error("Can not convert " + obj + " to a number.");
             }
@@ -87,9 +86,9 @@ public class KeycloakSmsAuthenticatorUtil {
 
         if (config.getConfig() != null) {
             // Get value
-            Object obj = config.getConfig().get(configName);
+            String obj = config.getConfig().get(configName);
             try {
-                value = Boolean.valueOf((String) obj); // s --> ms
+                value = Boolean.valueOf(obj); // s --> ms
             } catch (NumberFormatException nfe) {
                 logger.error("Can not convert " + obj + " to a boolean.");
             }
@@ -98,17 +97,17 @@ public class KeycloakSmsAuthenticatorUtil {
         return value;
     }
 
-    public static String createMessage(String text,String code, String mobileNumber) {
-        if(text !=null){
+    public static String createMessage(String text, String code, String mobileNumber) {
+        if (text != null) {
             text = text.replaceAll("%sms-code%", code);
             text = text.replaceAll("%phonenumber%", mobileNumber);
         }
         return text;
     }
 
-    public static String setDefaultCountryCodeIfZero(String mobileNumber,String prefix ,String condition) {
+    public static String setDefaultCountryCodeIfZero(String mobileNumber, String prefix, String condition) {
 
-        if (prefix!=null && condition!=null && mobileNumber.startsWith(condition)) {
+        if (prefix != null && condition != null && mobileNumber.startsWith(condition)) {
             mobileNumber = prefix + mobileNumber.substring(1);
         }
         return mobileNumber;
@@ -116,6 +115,7 @@ public class KeycloakSmsAuthenticatorUtil {
 
     /**
      * Check mobile number normative strcuture
+     *
      * @param mobileNumber
      * @return formatted mobile number
      */
@@ -123,9 +123,8 @@ public class KeycloakSmsAuthenticatorUtil {
 
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
         try {
-            Phonenumber.PhoneNumber phone = phoneUtil.parse(mobileNumber, null);
-            mobileNumber = phoneUtil.format(phone,
-                    PhoneNumberUtil.PhoneNumberFormat.E164);
+            Phonenumber.PhoneNumber phone = phoneUtil.parse(mobileNumber, "TR");
+            mobileNumber = phoneUtil.format(phone, PhoneNumberUtil.PhoneNumberFormat.E164);
         } catch (NumberParseException e) {
             logger.error("Invalid phone number " + mobileNumber, e);
         }
@@ -134,14 +133,14 @@ public class KeycloakSmsAuthenticatorUtil {
     }
 
 
-    public static String getMessage(AuthenticationFlowContext context, String key){
-        String result=null;
+    public static String getMessage(AuthenticationFlowContext context, String key) {
+        String result = null;
         try {
             ThemeProvider themeProvider = context.getSession().getProvider(ThemeProvider.class, "extending");
             Theme currentTheme = themeProvider.getTheme(context.getRealm().getLoginTheme(), Theme.Type.LOGIN);
             Locale locale = context.getSession().getContext().resolveLocale(context.getUser());
             result = currentTheme.getMessages(locale).getProperty(key);
-        }catch (IOException e){
+        } catch (IOException e) {
             logger.warn(key + "not found in messages");
         }
         return result;
@@ -170,28 +169,26 @@ public class KeycloakSmsAuthenticatorUtil {
         String smsUsr = EnvSubstitutor.envSubstitutor.replace(getConfigString(config, KeycloakSmsConstants.CONF_PRP_SMS_CLIENTTOKEN));
         String smsPwd = EnvSubstitutor.envSubstitutor.replace(getConfigString(config, KeycloakSmsConstants.CONF_PRP_SMS_CLIENTSECRET));
         String gateway = getConfigString(config, KeycloakSmsConstants.CONF_PRP_SMS_GATEWAY);
-        String endpoint = EnvSubstitutor.envSubstitutor.replace(getConfigString(config, KeycloakSmsConstants.CONF_PRP_SMS_GATEWAY_ENDPOINT));
-        boolean isProxy = getConfigBoolean(config, KeycloakSmsConstants.PROXY_ENABLED);
 
-        String template =getMessage(context, KeycloakSmsConstants.CONF_PRP_SMS_TEXT);
+        String template = getMessage(context, KeycloakSmsConstants.CONF_PRP_SMS_TEXT);
 
-        String smsText = createMessage(template,code, mobileNumber);
+        String smsText = createMessage(template, code, mobileNumber);
         boolean result;
         SMSService smsService;
         try {
-            Gateways g=Gateways.valueOf(gateway);
-            switch(g) {
-                case LYRA_SMS:
-                    smsService=new LyraSMSService(endpoint,isProxy);
+            Gateways g = Gateways.valueOf(gateway);
+            switch (g) {
+                case SMS_LOGGER:
+                    smsService = new SMSLogger();
                     break;
                 default:
-                    smsService=new SnsNotificationService();
+                    throw new UnsupportedOperationException("Gateway can not be determined!");
             }
 
-            result=smsService.send(checkMobileNumber(setDefaultCountryCodeIfZero(mobileNumber, getMessage(context, KeycloakSmsConstants.MSG_MOBILE_PREFIX_DEFAULT), getMessage(context, KeycloakSmsConstants.MSG_MOBILE_PREFIX_CONDITION))), smsText, smsUsr, smsPwd);
-          return result;
-       } catch(Exception e) {
-            logger.error("Fail to send SMS " ,e );
+            result = smsService.send(checkMobileNumber(setDefaultCountryCodeIfZero(mobileNumber, getMessage(context, KeycloakSmsConstants.MSG_MOBILE_PREFIX_DEFAULT), getMessage(context, KeycloakSmsConstants.MSG_MOBILE_PREFIX_CONDITION))), smsText, smsUsr, smsPwd);
+            return result;
+        } catch (Exception e) {
+            logger.error("Fail to send SMS ", e);
             return false;
         }
     }

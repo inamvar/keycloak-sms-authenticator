@@ -1,4 +1,4 @@
-package six.six.keycloak.authenticator.credential;
+package com.berkaybayraktar.keycloak.authenticator.credential;
 
 import org.keycloak.common.util.Time;
 import org.keycloak.credential.*;
@@ -8,7 +8,7 @@ import org.keycloak.models.UserCredentialModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.cache.CachedUserModel;
 import org.keycloak.models.cache.OnUserCache;
-import six.six.keycloak.KeycloakSmsConstants;
+import com.berkaybayraktar.keycloak.KeycloakSmsConstants;
 
 import java.util.Collections;
 import java.util.HashSet;

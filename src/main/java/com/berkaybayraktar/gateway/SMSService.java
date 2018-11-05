@@ -1,4 +1,4 @@
-package six.six.gateway;
+package com.berkaybayraktar.gateway;
 
 /**
  * SMS provder interface

@@ -4,5 +4,5 @@ package com.berkaybayraktar.gateway;
  * SMS provder interface
  */
 public interface SMSService {
-    boolean send(String phoneNumber, String message, String login, String pw);
+    boolean send(String phoneNumber, String message, String login, String pw, String line);
 }

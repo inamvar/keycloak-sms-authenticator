@@ -3,6 +3,7 @@ package com.berkaybayraktar.keycloak.authenticator;
 
 import com.berkaybayraktar.gateway.Gateways;
 import com.berkaybayraktar.gateway.SMSService;
+import com.berkaybayraktar.gateway.niksms.NikSMS;
 import com.berkaybayraktar.gateway.smslogger.SMSLogger;
 import com.berkaybayraktar.keycloak.EnvSubstitutor;
 import com.berkaybayraktar.keycloak.KeycloakSmsConstants;
@@ -123,7 +124,7 @@ public class KeycloakSmsAuthenticatorUtil {
 
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
         try {
-            Phonenumber.PhoneNumber phone = phoneUtil.parse(mobileNumber, "TR");
+            Phonenumber.PhoneNumber phone = phoneUtil.parse(mobileNumber, "IR");
             mobileNumber = phoneUtil.format(phone, PhoneNumberUtil.PhoneNumberFormat.E164);
         } catch (NumberParseException e) {
             logger.error("Invalid phone number " + mobileNumber, e);
@@ -169,7 +170,7 @@ public class KeycloakSmsAuthenticatorUtil {
         String smsUsr = EnvSubstitutor.envSubstitutor.replace(getConfigString(config, KeycloakSmsConstants.CONF_PRP_SMS_CLIENTTOKEN));
         String smsPwd = EnvSubstitutor.envSubstitutor.replace(getConfigString(config, KeycloakSmsConstants.CONF_PRP_SMS_CLIENTSECRET));
         String gateway = getConfigString(config, KeycloakSmsConstants.CONF_PRP_SMS_GATEWAY);
-
+        String lineNumber = getConfigString(config, KeycloakSmsConstants.CONF_PRP_SMS_LINENUMBER);
         String template = getMessage(context, KeycloakSmsConstants.CONF_PRP_SMS_TEXT);
 
         String smsText = createMessage(template, code, mobileNumber);
@@ -181,11 +182,14 @@ public class KeycloakSmsAuthenticatorUtil {
                 case SMS_LOGGER:
                     smsService = new SMSLogger();
                     break;
+                    case NIK_SMS:
+                    smsService = new NikSMS();
+                    break;                    
                 default:
                     throw new UnsupportedOperationException("Gateway can not be determined!");
             }
 
-            result = smsService.send(checkMobileNumber(setDefaultCountryCodeIfZero(mobileNumber, getMessage(context, KeycloakSmsConstants.MSG_MOBILE_PREFIX_DEFAULT), getMessage(context, KeycloakSmsConstants.MSG_MOBILE_PREFIX_CONDITION))), smsText, smsUsr, smsPwd);
+            result = smsService.send(checkMobileNumber(setDefaultCountryCodeIfZero(mobileNumber, getMessage(context, KeycloakSmsConstants.MSG_MOBILE_PREFIX_DEFAULT), getMessage(context, KeycloakSmsConstants.MSG_MOBILE_PREFIX_CONDITION))), smsText, smsUsr, smsPwd, lineNumber);
             return result;
         } catch (Exception e) {
             logger.error("Fail to send SMS ", e);

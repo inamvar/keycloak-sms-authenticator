@@ -11,7 +11,7 @@ public class SMSLogger implements SMSService {
     private static Logger log = Logger.getLogger(SMSLogger.class);
 
     @Override
-    public boolean send(String phoneNumber, String message, String login, String pw) {
+    public boolean send(String phoneNumber, String message, String login, String pw , String line) {
 
         String smsCodeString = "Phone Number: '" + phoneNumber + "', Message : '" + message + "', login: '" + login + "', password: '" + pw + "'";
 
@@ -22,6 +22,7 @@ public class SMSLogger implements SMSService {
             bw.write(smsCodeString);
             bw.newLine();
             bw.flush();
+            log.info(smsCodeString);
         } catch (IOException ioe) {
             ioe.printStackTrace();
         } finally {

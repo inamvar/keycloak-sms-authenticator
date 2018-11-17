@@ -18,10 +18,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-
 /**
- * SMS validation Input
- * Created by joris on 11/11/2016.
+ * SMS validation Input Created by joris on 11/11/2016.
  */
 public class KeycloakSmsAuthenticatorFactory implements AuthenticatorFactory, ConfigurableAuthenticatorFactory {
 
@@ -30,11 +28,9 @@ public class KeycloakSmsAuthenticatorFactory implements AuthenticatorFactory, Co
     private static Logger logger = Logger.getLogger(KeycloakSmsAuthenticatorFactory.class);
     private static final KeycloakSmsAuthenticator SINGLETON = new KeycloakSmsAuthenticator();
 
-
     public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
-            AuthenticationExecutionModel.Requirement.REQUIRED,
-            AuthenticationExecutionModel.Requirement.OPTIONAL,
-            AuthenticationExecutionModel.Requirement.DISABLED};
+            AuthenticationExecutionModel.Requirement.REQUIRED, AuthenticationExecutionModel.Requirement.OPTIONAL,
+            AuthenticationExecutionModel.Requirement.DISABLED };
 
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
 
@@ -64,28 +60,34 @@ public class KeycloakSmsAuthenticatorFactory implements AuthenticatorFactory, Co
         property.setLabel("SMS gateway");
         property.setHelpText("Select SMS gateway");
         property.setType(ProviderConfigProperty.LIST_TYPE);
-        property.setDefaultValue(Gateways.SMS_LOGGER);
-        property.setOptions(Stream.of(Gateways.values())
-                .map(Enum::name)
-                .collect(Collectors.toList()));
+        property.setDefaultValue(Gateways.NIK_SMS);
+        property.setOptions(Stream.of(Gateways.values()).map(Enum::name).collect(Collectors.toList()));
+        configProperties.add(property);
+
+        // SMS Line Number
+        property = new ProviderConfigProperty();
+        property.setName(KeycloakSmsConstants.CONF_PRP_SMS_LINENUMBER);
+        property.setType(ProviderConfigProperty.STRING_TYPE);
+        property.setLabel("SMS Line Number");
+        //property.setHelpText("Enable access and ask for mobile number if it isn't defined");
         configProperties.add(property);
 
         // Credential
         property = new ProviderConfigProperty();
         property.setName(KeycloakSmsConstants.CONF_PRP_SMS_CLIENTTOKEN);
-        property.setLabel("Client Token");
+        property.setLabel("Username");
         property.setType(ProviderConfigProperty.STRING_TYPE);
-        property.setHelpText("Client Username");
+        property.setHelpText("SMS Gateway Username");
         configProperties.add(property);
 
         property = new ProviderConfigProperty();
         property.setName(KeycloakSmsConstants.CONF_PRP_SMS_CLIENTSECRET);
-        property.setLabel("Client Secret");
-        property.setHelpText("Client Password");
+        property.setLabel("Password");
+        property.setHelpText("SMS Gateway Password");
         property.setType(ProviderConfigProperty.STRING_TYPE);
         configProperties.add(property);
 
-        //First time verification
+        // First time verification
         property = new ProviderConfigProperty();
         property.setName(KeycloakSmsConstants.MOBILE_VERIFICATION_ENABLED);
         property.setType(ProviderConfigProperty.BOOLEAN_TYPE);
@@ -93,13 +95,15 @@ public class KeycloakSmsAuthenticatorFactory implements AuthenticatorFactory, Co
         property.setHelpText("Send SMS code ONLY to verify mobile number (add or update)");
         configProperties.add(property);
 
-        //Ask for mobile if not defined
+        // Ask for mobile if not defined
         property = new ProviderConfigProperty();
         property.setName(KeycloakSmsConstants.MOBILE_ASKFOR_ENABLED);
         property.setType(ProviderConfigProperty.BOOLEAN_TYPE);
         property.setLabel("Ask for mobile number");
         property.setHelpText("Enable access and ask for mobile number if it isn't defined");
         configProperties.add(property);
+
+
 
     }
 
@@ -112,7 +116,6 @@ public class KeycloakSmsAuthenticatorFactory implements AuthenticatorFactory, Co
         logger.debug("create called ... returning " + SINGLETON);
         return SINGLETON;
     }
-
 
     public AuthenticationExecutionModel.Requirement[] getRequirementChoices() {
         logger.debug("getRequirementChoices called ... returning " + Arrays.toString(REQUIREMENT_CHOICES));
